@@ -21,7 +21,7 @@ const CATEGORIES = [
   { label: 'Baby Food', query: 'baby food', icon: '👶' },
 ];
 
-const AU_QUERIES = ['Vegemite', 'Weet-Bix', 'Tim Tam', 'Shapes', 'Sanitarium', "Arnott's"];
+const AU_QUERIES = ['Vegemite', 'Weet-Bix', 'Tim Tam', 'Woolworths Macro', "Arnott's", 'Sanitarium'];
 
 // ---------- Data fetching ----------
 
@@ -86,7 +86,7 @@ export default async function HomePage() {
           {/* Stats bar */}
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 mt-12 py-4 border-t border-b border-border">
             <div className="flex items-center gap-2">
-              <Mono className="text-text font-semibold text-base">22,500+</Mono>
+              <Mono className="text-text font-semibold text-base">73,000+</Mono>
               <Caption className="text-text-muted">Australian products</Caption>
             </div>
             <div className="hidden sm:block w-px h-4 bg-border-strong" aria-hidden="true" />

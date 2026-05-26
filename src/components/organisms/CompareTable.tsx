@@ -24,9 +24,9 @@ const NUTRIENT_KEYS = [
 const LOWER_IS_BETTER = new Set(['Fat', 'Saturated Fat', 'Sugars', 'Salt', 'Energy']);
 
 function findNutrient(nutrients: Nutrient[], name: string): Nutrient | undefined {
-  // Try exact match first, then case-insensitive partial
+  // Try exact case-insensitive match first, fall back to partial only if no exact match
   return (
-    nutrients.find((n) => n.name === name) ??
+    nutrients.find((n) => n.name.toLowerCase() === name.toLowerCase()) ??
     nutrients.find((n) => n.name.toLowerCase().includes(name.toLowerCase()))
   );
 }
@@ -95,6 +95,23 @@ function ProductHeader({ product, barcode }: { product: Product | null; barcode:
 }
 
 export function CompareTable({ products, barcodes }: CompareTableProps) {
+  const validProducts = products.filter((p): p is Product => p !== null);
+
+  if (validProducts.length < 2) {
+    return (
+      <Card variant="flat" padding="lg">
+        <div className="text-center py-8 space-y-3">
+          <Heading4>Not enough products to compare</Heading4>
+          <Body className="text-text-muted">
+            {validProducts.length === 0
+              ? 'None of the selected products could be found. Please try different barcodes.'
+              : 'Only one product was found. Select at least 2 products to compare them side by side.'}
+          </Body>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Product headers */}
@@ -208,12 +225,14 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
             </tr>
 
             {/* Nutrient rows */}
-            {NUTRIENT_KEYS.map(({ name, unit }, rowIdx) => {
-              const values = products.map((product) => {
+            {NUTRIENT_KEYS.map(({ name, unit: fallbackUnit }, rowIdx) => {
+              const nutrients = products.map((product) => {
                 if (!product) return null;
-                const nutrient = findNutrient(product.nutrients, name);
-                return nutrient?.per100g ?? null;
+                return findNutrient(product.nutrients, name) ?? null;
               });
+              const values = nutrients.map((n) => n?.per100g ?? null);
+              // Use unit from the first product that has this nutrient, fall back to hardcoded
+              const unit = nutrients.find((n) => n?.unit)?.unit ?? fallbackUnit;
 
               const bestIdx = getBestIndex(values, LOWER_IS_BETTER.has(name));
               const isEven = rowIdx % 2 === 0;

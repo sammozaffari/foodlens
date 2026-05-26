@@ -138,7 +138,7 @@ export async function getProduct(barcode: string): Promise<ProductApiResponse> {
   const timeout = setTimeout(() => controller.abort(), PRODUCT_TIMEOUT);
 
   try {
-    const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`;
+    const url = `https://au.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`;
     const response = await fetch(url, {
       headers: { 'User-Agent': USER_AGENT },
       signal: controller.signal,
@@ -185,12 +185,9 @@ export async function searchProducts(
       json: '1',
       page_size: '24',
       page: String(page),
-      tagtype_0: 'countries',
-      tag_contains_0: 'contains',
-      tag_0: 'Australia',
     });
 
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
+    const url = `https://au.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
 
     // Retry up to 2 times on failure
     let response: Response | null = null;
