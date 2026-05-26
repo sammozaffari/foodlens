@@ -201,7 +201,17 @@ export async function searchProducts(
     }
 
     const data: OFFSearchResponse = await response.json();
-    const products: SearchResultProduct[] = (data.products || []).map(mapSearchResult);
+    const allProducts: SearchResultProduct[] = (data.products || []).map(mapSearchResult);
+
+    // Deduplicate by product name + brand (OFF often has multiple barcodes for the same product)
+    const seen = new Set<string>();
+    const products = allProducts.filter((p) => {
+      const key = `${(p.name || '').toLowerCase().trim()}|${(p.brand || '').toLowerCase().trim()}`;
+      if (key === '|' || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     const totalResults = data.count || 0;
     const pageSize = data.page_size || 20;
     const currentPage = data.page || page;
