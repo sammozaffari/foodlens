@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getProduct } from '@/lib/api/openfoodfacts';
@@ -5,13 +6,15 @@ import { Button, Heading3, Body } from '@/components/atoms';
 import { ProductCard } from '@/components/organisms';
 import { BackButton } from './BackButton';
 
+const getCachedProduct = cache((barcode: string) => getProduct(barcode));
+
 interface ProductPageProps {
   params: Promise<{ barcode: string }>;
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { barcode } = await params;
-  const result = await getProduct(barcode);
+  const result = await getCachedProduct(barcode);
 
   if (result.status === 'found' && result.product) {
     return {
@@ -27,7 +30,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { barcode } = await params;
-  const result = await getProduct(barcode);
+  const result = await getCachedProduct(barcode);
 
   return (
     <main className="max-w-4xl mx-auto px-6 pb-8 min-h-screen">

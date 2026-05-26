@@ -67,7 +67,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           <span className="animate-spin size-4 border-2 border-current border-t-transparent rounded-full" aria-hidden="true" />
         )}
         {!loading && iconLeft}
-        <span>{children}</span>
+        {children != null && <span>{children}</span>}
         {!loading && iconRight}
         {loading && <span className="sr-only">Loading</span>}
       </button>

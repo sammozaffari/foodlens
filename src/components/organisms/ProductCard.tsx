@@ -41,6 +41,7 @@ function ProductImage({ product }: { product: Product }) {
         src={product.imageUrl}
         alt={`${product.name} by ${product.brand}`}
         fill
+        sizes="(max-width: 768px) 100vw, 240px"
         className="object-contain"
         onError={() => setError(true)}
       />
@@ -121,7 +122,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         {/* Allergens */}
         {(product.allergens.length > 0 || product.traces.length > 0) && (
-          <div role="alert" aria-label="Allergen information" className="mt-4 flex flex-wrap gap-2">
+          <div role="region" aria-label="Allergen information" className="mt-4 flex flex-wrap gap-2">
             {product.allergens.map((allergen) => (
               <AllergenBadge key={`declared-${allergen.id}`} allergen={allergen} />
             ))}

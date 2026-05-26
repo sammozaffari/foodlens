@@ -36,11 +36,18 @@ type SearchAction =
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-surface">
-      <div className="w-14 h-14 rounded-md bg-surface-raised skeleton-pulse flex-shrink-0" />
-      <div className="flex-1 space-y-2">
+    <div className="flex flex-col rounded-lg border border-border bg-surface p-3">
+      {/* Square image placeholder */}
+      <div className="w-full aspect-square rounded-md bg-surface-raised skeleton-pulse mb-3" />
+      {/* Text lines */}
+      <div className="space-y-2">
         <div className="w-3/4 h-4 bg-surface-raised skeleton-pulse rounded" />
         <div className="w-1/2 h-3 bg-surface-raised skeleton-pulse rounded" />
+      </div>
+      {/* Bottom row placeholder */}
+      <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border">
+        <div className="w-6 h-6 rounded bg-surface-raised skeleton-pulse" />
+        <div className="w-6 h-6 rounded bg-surface-raised skeleton-pulse" />
       </div>
     </div>
   );

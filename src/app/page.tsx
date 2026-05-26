@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { searchProducts } from '@/lib/api/openfoodfacts';
@@ -250,6 +252,7 @@ export default async function HomePage() {
                           src={product.imageSmallUrl}
                           alt={product.name}
                           fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                           className="object-contain p-2"
                         />
                       ) : (
