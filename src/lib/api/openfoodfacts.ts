@@ -183,21 +183,35 @@ export async function searchProducts(
       search_simple: '1',
       action: 'process',
       json: '1',
-      page_size: '20',
+      page_size: '24',
       page: String(page),
-      tagtype_0: 'countries',
-      tag_contains_0: 'contains',
-      tag_0: 'australia',
     });
 
     const url = `https://world.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
-    const response = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT },
-      signal: controller.signal,
-    });
 
-    if (!response.ok) {
-      return { status: 'error', data: null, error: `HTTP ${response.status}` };
+    // Retry up to 2 times on failure
+    let response: Response | null = null;
+    let lastError = '';
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        response = await fetch(url, {
+          headers: { 'User-Agent': USER_AGENT },
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        if (response.ok) break;
+        lastError = `HTTP ${response.status}`;
+        // Wait briefly before retry
+        if (attempt < 2) await new Promise(r => setTimeout(r, 500));
+      } catch (e) {
+        if (e instanceof Error && e.name === 'AbortError') throw e;
+        lastError = e instanceof Error ? e.message : 'Network error';
+        if (attempt < 2) await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    if (!response || !response.ok) {
+      return { status: 'error', data: null, error: lastError || 'Search failed after retries' };
     }
 
     const data: OFFSearchResponse = await response.json();
