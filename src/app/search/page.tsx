@@ -59,7 +59,7 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <main className="max-w-2xl mx-auto px-4 min-h-screen">
+    <main className="max-w-4xl mx-auto px-6 min-h-screen">
       <Suspense fallback={
         <div className="py-3 border-b border-border">
           <div className="w-20 h-5 bg-surface-raised animate-pulse rounded" />

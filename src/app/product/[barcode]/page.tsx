@@ -30,7 +30,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const result = await getProduct(barcode);
 
   return (
-    <main className="max-w-2xl mx-auto px-4 pb-8 min-h-screen">
+    <main className="max-w-4xl mx-auto px-6 pb-8 min-h-screen">
       {/* Top bar */}
       <div className="flex items-center gap-3 py-3 border-b border-border">
         <BackButton />

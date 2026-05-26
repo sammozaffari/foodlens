@@ -77,11 +77,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
     <div className={`space-y-6 ${className || ''}`}>
       {/* Layer 1: Glance */}
       <section>
-        <ProductImage product={product} />
-
-        <div className="mt-4">
-          <Heading2>{product.name}</Heading2>
-          <BodySmall className="text-text-muted mt-1">{product.brand}</BodySmall>
+        <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
+          <ProductImage product={product} />
+          <div>
+            <Heading2>{product.name}</Heading2>
+            <BodySmall className="text-text-muted mt-1">{product.brand}</BodySmall>
+          </div>
         </div>
 
         {/* Score badges — clickable to scroll to breakdown */}

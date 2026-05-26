@@ -3,8 +3,8 @@ import { Button, Display, Body, Caption } from '@/components/atoms';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4">
-      <div className="text-center space-y-6 max-w-md">
+    <main className="min-h-screen flex flex-col items-center justify-center px-6">
+      <div className="text-center space-y-6 max-w-lg w-full">
         <Display>FoodLens</Display>
         <Body className="text-text-muted">See what&apos;s really in your food.</Body>
 

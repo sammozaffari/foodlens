@@ -67,6 +67,7 @@ export function SearchResults({ query, className }: SearchResultsProps) {
 
     fetch(`/api/search?q=${encodeURIComponent(trimmed)}&page=1`, {
       signal: controller.signal,
+      cache: 'no-store',
     })
       .then((res) => res.json())
       .then((data: SearchApiResponse) => {
@@ -215,7 +216,7 @@ export function SearchResults({ query, className }: SearchResultsProps) {
       <div aria-live="polite" className="sr-only">
         {state.totalResults} products found
       </div>
-      <div role="list" aria-label="Search results">
+      <div role="list" aria-label="Search results" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {state.products.map((product) => (
           <div key={product.barcode} role="listitem">
             <SearchResultRow product={product} />
