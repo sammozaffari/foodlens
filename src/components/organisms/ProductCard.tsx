@@ -107,36 +107,50 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
         </div>
 
-        {/* Score badges — clickable to scroll to breakdown */}
+        {/* Score badges — only show if we have at least one score */}
+        {(product.nutriScore || product.novaGroup || product.ingredientScore) ? (
         <div role="group" aria-label="Health scores" className="flex flex-wrap gap-3 mt-5">
+          {product.nutriScore && (
           <button onClick={() => scrollToSection('section-nutrition')} className="text-left cursor-pointer">
             <ScoreBadge
               type="nutriscore"
-              value={product.nutriScore?.grade ?? null}
-              label={product.nutriScore?.label ?? 'No data'}
-              color={product.nutriScore?.color ?? 'text-text-subtle'}
-              bgColor={product.nutriScore?.bgColor ?? ''}
+              value={product.nutriScore.grade}
+              label={product.nutriScore.label}
+              color={product.nutriScore.color}
+              bgColor={product.nutriScore.bgColor}
             />
           </button>
+          )}
+          {product.novaGroup && (
           <button onClick={() => scrollToSection('section-processing')} className="text-left cursor-pointer">
             <ScoreBadge
               type="nova"
-              value={product.novaGroup?.group ?? null}
-              label={product.novaGroup?.label ?? 'No data'}
-              color={product.novaGroup?.color ?? 'text-text-subtle'}
-              bgColor={product.novaGroup?.bgColor ?? ''}
+              value={product.novaGroup.group}
+              label={product.novaGroup.label}
+              color={product.novaGroup.color}
+              bgColor={product.novaGroup.bgColor}
             />
           </button>
+          )}
+          {product.ingredientScore && (
           <button onClick={() => scrollToSection('section-additives')} className="text-left cursor-pointer">
             <ScoreBadge
               type="ingredients"
-              value={product.ingredientScore ? product.ingredientScore.additiveCount : null}
-              label={product.ingredientScore?.label ?? 'No data'}
-              color={product.ingredientScore?.color ?? 'text-text-subtle'}
-              bgColor={product.ingredientScore?.bgColor ?? ''}
+              value={product.ingredientScore.additiveCount}
+              label={product.ingredientScore.label}
+              color={product.ingredientScore.color}
+              bgColor={product.ingredientScore.bgColor}
             />
           </button>
+          )}
         </div>
+        ) : (
+        <Card variant="flat" padding="sm" className="mt-4">
+          <BodySmall className="text-text-muted">
+            Nutrition scores not yet available for this product. Ingredient and nutrition data may still be shown below if available.
+          </BodySmall>
+        </Card>
+        )}
 
         {/* Allergens */}
         {(product.allergens.length > 0 || product.traces.length > 0) && (

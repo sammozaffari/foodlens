@@ -269,36 +269,51 @@ export async function getProductScores(barcode: string): Promise<{
   novaGroup: NovaGroup | null;
   imageSmallUrl: string | null;
 } | null> {
-  try {
-    const fields = 'nutriscore_grade,nova_group,image_small_url';
-    const url = `https://au.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${fields}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-
-    const response = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) return null;
-
-    const data: OFFProductResponse = await response.json();
-    if (data.status === 0 || !data.product) return null;
-
-    const raw = data.product;
-    return {
-      nutriScoreGrade: isValidNutriScoreGrade(raw.nutriscore_grade)
-        ? (raw.nutriscore_grade as NutriScoreGrade)
-        : null,
-      novaGroup: isValidNovaGroup(raw.nova_group)
-        ? (raw.nova_group as NovaGroup)
-        : null,
-      imageSmallUrl: raw.image_small_url || null,
-    };
-  } catch {
-    return null;
+  // Try original barcode, then zero-padded to 13 digits (OFF sometimes stores them differently)
+  const barcodes = [barcode];
+  if (barcode.length < 13) {
+    barcodes.push(barcode.padStart(13, '0'));
   }
+
+  for (const bc of barcodes) {
+    try {
+      const fields = 'nutriscore_grade,nova_group,image_small_url';
+      const url = `https://au.openfoodfacts.org/api/v2/product/${bc}.json?fields=${fields}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+
+      const response = await fetch(url, {
+        headers: { 'User-Agent': USER_AGENT },
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) continue;
+
+      const data: OFFProductResponse = await response.json();
+      if (data.status === 0 || !data.product) continue;
+
+      const raw = data.product;
+      const result = {
+        nutriScoreGrade: isValidNutriScoreGrade(raw.nutriscore_grade)
+          ? (raw.nutriscore_grade as NutriScoreGrade)
+          : null,
+        novaGroup: isValidNovaGroup(raw.nova_group)
+          ? (raw.nova_group as NovaGroup)
+          : null,
+        imageSmallUrl: raw.image_small_url || null,
+      };
+
+      // Only return if we got at least some useful data
+      if (result.nutriScoreGrade || result.novaGroup || result.imageSmallUrl) {
+        return result;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
 }
 
 // ---------- Internal mappers ----------
