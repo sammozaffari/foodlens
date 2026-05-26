@@ -56,8 +56,10 @@ export async function GET(request: Request): Promise<Response> {
       return true;
     });
 
-    // 2. Enrich first 12 results with OFF nutrition data (in parallel)
-    const limitedResults = dedupedResults.slice(0, 12);
+    // 2. Enrich first 6 results with OFF nutrition data (in parallel)
+    // Keep it to 6 to stay well within OFF's 100 req/min rate limit
+    const enrichCount = Math.min(dedupedResults.length, 6);
+    const limitedResults = dedupedResults.slice(0, enrichCount);
     const offScores = await Promise.all(
       limitedResults.map((wp) => getProductScores(String(wp.barcode)))
     );
@@ -78,8 +80,8 @@ export async function GET(request: Request): Promise<Response> {
       };
     });
 
-    // Also include remaining deduped results beyond 12 (without OFF enrichment)
-    for (let i = 12; i < dedupedResults.length; i++) {
+    // Also include remaining deduped results beyond enriched set (without OFF enrichment)
+    for (let i = enrichCount; i < dedupedResults.length; i++) {
       const wp = dedupedResults[i];
       products.push({
         barcode: String(wp.barcode),

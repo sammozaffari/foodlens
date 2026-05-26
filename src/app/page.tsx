@@ -22,7 +22,7 @@ const CATEGORIES = [
   { label: 'Baby Food', query: 'baby food', icon: '👶' },
 ];
 
-const AU_QUERIES = ['Vegemite', 'Weet-Bix', 'Tim Tam', 'Woolworths Macro', "Arnott's", 'Sanitarium'];
+const AU_QUERIES = ['Vegemite', 'Tim Tam', "Arnott's"];
 
 // ---------- Data fetching ----------
 
@@ -37,13 +37,13 @@ async function getAustralianProducts(): Promise<SearchResultProduct[]> {
       .trim();
 
   for (const query of AU_QUERIES) {
-    if (products.length >= 12) break;
+    if (products.length >= 6) break;
     try {
       const result = await searchWoolworths(query, 1, 4);
       if (result && result.results) {
         let added = 0;
         for (const wp of result.results) {
-          if (added >= 2 || products.length >= 12) break;
+          if (added >= 2 || products.length >= 6) break;
           const key = `${normalizeName(wp.product_name || '')}|${(wp.product_brand || '').toLowerCase().trim()}`;
           if (key === '|' || key.startsWith('|') || seen.has(key)) continue;
           seen.add(key);
