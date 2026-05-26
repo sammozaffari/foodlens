@@ -4,8 +4,10 @@ import { Suspense, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Heading3 } from '@/components/atoms';
 import { SearchBar } from '@/components/molecules';
-import { SearchResults } from '@/components/organisms';
+import { SearchResults, CompareBar } from '@/components/organisms';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useCompareList } from '@/hooks/useCompareList';
+import type { SearchResultProduct } from '@/types/product';
 
 function SearchContent() {
   const router = useRouter();
@@ -13,6 +15,10 @@ function SearchContent() {
   const initialQuery = searchParams.get('q') || '';
   const [searchInput, setSearchInput] = useState(initialQuery);
   const debouncedQuery = useDebounce(searchInput, 300);
+  const compareList = useCompareList();
+
+  // Keep a map of barcode -> product info for CompareBar thumbnails
+  const [productMap, setProductMap] = useState<Map<string, SearchResultProduct>>(new Map());
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
@@ -20,6 +26,33 @@ function SearchContent() {
     if (value) params.set('q', value);
     router.replace(`/search${value ? `?${params.toString()}` : ''}`, { scroll: false });
   }, [router]);
+
+  const handleCompareToggle = useCallback((barcode: string) => {
+    if (compareList.isInList(barcode)) {
+      compareList.remove(barcode);
+    } else {
+      compareList.add(barcode);
+    }
+  }, [compareList]);
+
+  // Collect product data for CompareBar thumbnails
+  const handleProductsRendered = useCallback((products: SearchResultProduct[]) => {
+    setProductMap((prev) => {
+      const next = new Map(prev);
+      let changed = false;
+      for (const p of products) {
+        if (!next.has(p.barcode)) {
+          next.set(p.barcode, p);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, []);
+
+  const compareProducts = compareList.barcodes
+    .map((b) => productMap.get(b))
+    .filter((p): p is SearchResultProduct => p !== undefined);
 
   return (
     <>
@@ -51,8 +84,23 @@ function SearchContent() {
         />
       </div>
 
-      {/* Results */}
-      <SearchResults query={debouncedQuery} />
+      {/* Results — extra bottom padding when compare bar is visible */}
+      <div className={compareList.barcodes.length >= 2 ? 'pb-20' : ''}>
+        <SearchResults
+          query={debouncedQuery}
+          onCompareToggle={handleCompareToggle}
+          compareBarcodes={compareList.barcodes}
+          onProductsRendered={handleProductsRendered}
+        />
+      </div>
+
+      {/* Compare bar */}
+      <CompareBar
+        barcodes={compareList.barcodes}
+        products={compareProducts}
+        onClear={compareList.clear}
+        onRemove={compareList.remove}
+      />
     </>
   );
 }

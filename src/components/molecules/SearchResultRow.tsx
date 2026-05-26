@@ -4,12 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Body, BodySmall } from '@/components/atoms';
+import { CompareButton } from './CompareButton';
 import type { SearchResultProduct } from '@/types/product';
 import { getNutriScoreColor, getNutriScoreBgColor } from '@/types/product';
 
 interface SearchResultRowProps {
   product: SearchResultProduct;
   className?: string;
+  onCompareToggle?: (barcode: string) => void;
+  isCompared?: boolean;
 }
 
 function PlaceholderImage() {
@@ -22,7 +25,7 @@ function PlaceholderImage() {
   );
 }
 
-export function SearchResultRow({ product, className }: SearchResultRowProps) {
+export function SearchResultRow({ product, className, onCompareToggle, isCompared }: SearchResultRowProps) {
   const [imageError, setImageError] = useState(false);
   const showImage = product.imageSmallUrl && !imageError;
 
@@ -52,6 +55,13 @@ export function SearchResultRow({ product, className }: SearchResultRowProps) {
         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getNutriScoreBgColor(product.nutriScoreGrade)} ${getNutriScoreColor(product.nutriScoreGrade)}`}>
           {product.nutriScoreGrade.toUpperCase()}
         </div>
+      )}
+      {onCompareToggle && (
+        <CompareButton
+          barcode={product.barcode}
+          isSelected={isCompared ?? false}
+          onToggle={onCompareToggle}
+        />
       )}
     </Link>
   );

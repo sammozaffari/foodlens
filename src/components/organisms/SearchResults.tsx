@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useReducer, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { Body, BodySmall, Button, Heading3 } from '@/components/atoms';
 import { Card } from '@/components/atoms';
@@ -10,6 +10,9 @@ import type { SearchResultProduct, SearchApiResponse } from '@/types/product';
 interface SearchResultsProps {
   query: string;
   className?: string;
+  onCompareToggle?: (barcode: string) => void;
+  compareBarcodes?: string[];
+  onProductsRendered?: (products: SearchResultProduct[]) => void;
 }
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -22,6 +25,14 @@ interface SearchState {
   page: number;
   error: string | null;
 }
+
+type SearchAction =
+  | { type: 'reset' }
+  | { type: 'loading' }
+  | { type: 'success'; products: SearchResultProduct[]; hasMore: boolean; totalResults: number; page: number }
+  | { type: 'append'; products: SearchResultProduct[]; hasMore: boolean; totalResults: number; page: number }
+  | { type: 'error'; error: string }
+  | { type: 'loadingMore'; loading: boolean };
 
 function SkeletonRow() {
   return (
@@ -44,17 +55,58 @@ const initialState: SearchState = {
   error: null,
 };
 
-export function SearchResults({ query, className }: SearchResultsProps) {
-  const [state, setState] = useState<SearchState>(initialState);
-  const [loadingMore, setLoadingMore] = useState(false);
+function reducer(state: SearchState, action: SearchAction): SearchState {
+  switch (action.type) {
+    case 'reset':
+      return initialState;
+    case 'loading':
+      return { ...state, status: 'loading', products: [], error: null };
+    case 'success':
+      return {
+        status: 'success',
+        products: action.products,
+        hasMore: action.hasMore,
+        totalResults: action.totalResults,
+        page: action.page,
+        error: null,
+      };
+    case 'append':
+      return {
+        ...state,
+        products: [...state.products, ...action.products],
+        hasMore: action.hasMore,
+        totalResults: action.totalResults,
+        page: action.page,
+      };
+    case 'error':
+      return { ...state, status: 'error', error: action.error };
+    default:
+      return state;
+  }
+}
+
+export function SearchResults({ query, className, onCompareToggle, compareBarcodes, onProductsRendered }: SearchResultsProps) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [loadingMore, setLoadingMore] = useReducer((_: boolean, v: boolean) => v, false);
   const abortRef = useRef<AbortController | null>(null);
+  const onProductsRenderedRef = useRef(onProductsRendered);
+  useEffect(() => {
+    onProductsRenderedRef.current = onProductsRendered;
+  });
+
+  const fetchPage = useCallback((q: string, page: number, signal?: AbortSignal) => {
+    return fetch(`/api/search?q=${encodeURIComponent(q)}&page=${page}`, {
+      signal,
+      cache: 'no-store',
+    }).then((res) => res.json() as Promise<SearchApiResponse>);
+  }, []);
 
   // Fetch when query changes
   useEffect(() => {
     const trimmed = query.trim();
 
     if (!trimmed) {
-      setState(initialState);
+      dispatch({ type: 'reset' });
       return;
     }
 
@@ -63,99 +115,72 @@ export function SearchResults({ query, className }: SearchResultsProps) {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setState((prev) => ({ ...prev, status: 'loading', products: [], error: null }));
+    dispatch({ type: 'loading' });
 
-    fetch(`/api/search?q=${encodeURIComponent(trimmed)}&page=1`, {
-      signal: controller.signal,
-      cache: 'no-store',
-    })
-      .then((res) => res.json())
-      .then((data: SearchApiResponse) => {
+    fetchPage(trimmed, 1, controller.signal)
+      .then((data) => {
         if (controller.signal.aborted) return;
         if (data.status === 'ok' && data.data) {
-          setState({
-            status: 'success',
+          dispatch({
+            type: 'success',
             products: data.data.products,
             hasMore: data.data.hasMore,
             totalResults: data.data.totalResults,
             page: 1,
-            error: null,
           });
+          onProductsRenderedRef.current?.(data.data.products);
         } else {
-          setState((prev) => ({
-            ...prev,
-            status: 'error',
-            error: data.error || 'Something went wrong.',
-          }));
+          dispatch({ type: 'error', error: data.error || 'Something went wrong.' });
         }
       })
       .catch((err) => {
         if (err instanceof Error && err.name === 'AbortError') return;
-        setState((prev) => ({
-          ...prev,
-          status: 'error',
-          error: 'Unable to reach food database.',
-        }));
+        dispatch({ type: 'error', error: 'Unable to reach food database.' });
       });
 
     return () => controller.abort();
-  }, [query]);
+  }, [query, fetchPage]);
 
   const handleLoadMore = () => {
     setLoadingMore(true);
     const nextPage = state.page + 1;
 
-    fetch(`/api/search?q=${encodeURIComponent(query)}&page=${nextPage}`)
-      .then((res) => res.json())
-      .then((data: SearchApiResponse) => {
+    fetchPage(query, nextPage)
+      .then((data) => {
         if (data.status === 'ok' && data.data) {
-          setState((prev) => ({
-            ...prev,
-            products: [...prev.products, ...data.data!.products],
-            hasMore: data.data!.hasMore,
-            totalResults: data.data!.totalResults,
+          dispatch({
+            type: 'append',
+            products: data.data.products,
+            hasMore: data.data.hasMore,
+            totalResults: data.data.totalResults,
             page: nextPage,
-          }));
+          });
+          onProductsRenderedRef.current?.(data.data.products);
         }
       })
       .finally(() => setLoadingMore(false));
   };
 
   const handleRetry = () => {
-    // Re-trigger the useEffect by toggling a state
-    setState(initialState);
-    // The useEffect will re-run because state changed back to idle,
-    // but query hasn't changed. Force it by setting status and letting effect run.
-    setTimeout(() => {
-      setState((prev) => ({ ...prev, status: 'loading' }));
-      fetch(`/api/search?q=${encodeURIComponent(query)}&page=1`)
-        .then((res) => res.json())
-        .then((data: SearchApiResponse) => {
-          if (data.status === 'ok' && data.data) {
-            setState({
-              status: 'success',
-              products: data.data.products,
-              hasMore: data.data.hasMore,
-              totalResults: data.data.totalResults,
-              page: 1,
-              error: null,
-            });
-          } else {
-            setState((prev) => ({
-              ...prev,
-              status: 'error',
-              error: data.error || 'Something went wrong.',
-            }));
-          }
-        })
-        .catch(() => {
-          setState((prev) => ({
-            ...prev,
-            status: 'error',
-            error: 'Unable to reach food database.',
-          }));
-        });
-    }, 0);
+    dispatch({ type: 'loading' });
+    fetchPage(query, 1)
+      .then((data) => {
+        if (data.status === 'ok' && data.data) {
+          dispatch({
+            type: 'success',
+            products: data.data.products,
+            hasMore: data.data.hasMore,
+            totalResults: data.data.totalResults,
+            page: 1,
+          });
+          onProductsRenderedRef.current?.(data.data.products);
+        } else {
+          dispatch({ type: 'error', error: data.error || 'Something went wrong.' });
+        }
+      })
+      .catch(() => {
+        dispatch({ type: 'error', error: 'Unable to reach food database.' });
+      });
   };
 
   // Idle state
@@ -219,7 +244,11 @@ export function SearchResults({ query, className }: SearchResultsProps) {
       <div role="list" aria-label="Search results" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {state.products.map((product) => (
           <div key={product.barcode} role="listitem">
-            <SearchResultRow product={product} />
+            <SearchResultRow
+              product={product}
+              onCompareToggle={onCompareToggle}
+              isCompared={compareBarcodes?.includes(product.barcode)}
+            />
           </div>
         ))}
       </div>
