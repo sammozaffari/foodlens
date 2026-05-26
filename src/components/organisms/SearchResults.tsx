@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Body, BodySmall, Button, Heading3 } from '@/components/atoms';
 import { Card } from '@/components/atoms';
@@ -35,32 +35,42 @@ function SkeletonRow() {
   );
 }
 
+const initialState: SearchState = {
+  status: 'idle',
+  products: [],
+  hasMore: false,
+  totalResults: 0,
+  page: 1,
+  error: null,
+};
+
 export function SearchResults({ query, className }: SearchResultsProps) {
-  const [state, setState] = useState<SearchState>({
-    status: 'idle',
-    products: [],
-    hasMore: false,
-    totalResults: 0,
-    page: 1,
-    error: null,
-  });
+  const [state, setState] = useState<SearchState>(initialState);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [lastFetchedQuery, setLastFetchedQuery] = useState('');
+  const abortRef = useRef<AbortController | null>(null);
 
-  // Derived loading state: if query changed since last fetch, we need to fetch
-  const needsFetch = query.trim() !== '' && query !== lastFetchedQuery;
+  // Fetch when query changes
+  useEffect(() => {
+    const trimmed = query.trim();
 
-  // Trigger initial fetch via a rendered effect-free mechanism
-  // We'll use a "fetch on first render when needed" approach
-  if (needsFetch && state.status !== 'loading') {
-    // Synchronously set loading state and kick off fetch
-    const newState: SearchState = { ...state, status: 'loading', products: [], error: null };
-    setState(newState);
-    setLastFetchedQuery(query);
+    if (!trimmed) {
+      setState(initialState);
+      return;
+    }
 
-    fetch(`/api/search?q=${encodeURIComponent(query)}&page=1`)
+    // Abort previous request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setState((prev) => ({ ...prev, status: 'loading', products: [], error: null }));
+
+    fetch(`/api/search?q=${encodeURIComponent(trimmed)}&page=1`, {
+      signal: controller.signal,
+    })
       .then((res) => res.json())
       .then((data: SearchApiResponse) => {
+        if (controller.signal.aborted) return;
         if (data.status === 'ok' && data.data) {
           setState({
             status: 'success',
@@ -71,19 +81,24 @@ export function SearchResults({ query, className }: SearchResultsProps) {
             error: null,
           });
         } else {
-          setState((prev) => ({ ...prev, status: 'error', error: data.error || 'Something went wrong.' }));
+          setState((prev) => ({
+            ...prev,
+            status: 'error',
+            error: data.error || 'Something went wrong.',
+          }));
         }
       })
-      .catch(() => {
-        setState((prev) => ({ ...prev, status: 'error', error: 'Unable to reach food database.' }));
+      .catch((err) => {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        setState((prev) => ({
+          ...prev,
+          status: 'error',
+          error: 'Unable to reach food database.',
+        }));
       });
-  }
 
-  // Reset to idle if query cleared
-  if (!query.trim() && state.status !== 'idle') {
-    setState({ status: 'idle', products: [], hasMore: false, totalResults: 0, page: 1, error: null });
-    setLastFetchedQuery('');
-  }
+    return () => controller.abort();
+  }, [query]);
 
   const handleLoadMore = () => {
     setLoadingMore(true);
@@ -106,7 +121,40 @@ export function SearchResults({ query, className }: SearchResultsProps) {
   };
 
   const handleRetry = () => {
-    setLastFetchedQuery(''); // Will trigger re-fetch on next render
+    // Re-trigger the useEffect by toggling a state
+    setState(initialState);
+    // The useEffect will re-run because state changed back to idle,
+    // but query hasn't changed. Force it by setting status and letting effect run.
+    setTimeout(() => {
+      setState((prev) => ({ ...prev, status: 'loading' }));
+      fetch(`/api/search?q=${encodeURIComponent(query)}&page=1`)
+        .then((res) => res.json())
+        .then((data: SearchApiResponse) => {
+          if (data.status === 'ok' && data.data) {
+            setState({
+              status: 'success',
+              products: data.data.products,
+              hasMore: data.data.hasMore,
+              totalResults: data.data.totalResults,
+              page: 1,
+              error: null,
+            });
+          } else {
+            setState((prev) => ({
+              ...prev,
+              status: 'error',
+              error: data.error || 'Something went wrong.',
+            }));
+          }
+        })
+        .catch(() => {
+          setState((prev) => ({
+            ...prev,
+            status: 'error',
+            error: 'Unable to reach food database.',
+          }));
+        });
+    }, 0);
   };
 
   // Idle state

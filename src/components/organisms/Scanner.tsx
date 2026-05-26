@@ -47,9 +47,10 @@ function ManualEntryForm({ value, onChange, onSubmit, inputRef }: ManualEntryFor
   );
 }
 
+const SCANNER_CONTAINER_ID = 'foodlens-scanner';
+
 export function Scanner({ onScan, onClose, className }: ScannerProps) {
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [manualBarcode, setManualBarcode] = useState('');
   const manualInputRef = useRef<HTMLInputElement>(null);
@@ -72,10 +73,14 @@ export function Scanner({ onScan, onClose, className }: ScannerProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Start scanning on mount if idle
+  // Start scanning once the container is mounted
   useEffect(() => {
-    if (state.status === 'idle' && videoRef.current) {
-      controls.start(videoRef.current);
+    if (state.status === 'idle') {
+      // Small delay to ensure the DOM container exists
+      const timer = setTimeout(() => {
+        controls.start(SCANNER_CONTAINER_ID);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [state.status, controls]);
 
@@ -85,8 +90,8 @@ export function Scanner({ onScan, onClose, className }: ScannerProps) {
     }
   };
 
-  // Permission request / idle state
-  if (state.status === 'idle' || state.status === 'requesting-permission') {
+  // Permission request state
+  if (state.status === 'requesting-permission') {
     return (
       <div className={`fixed inset-0 bg-overlay flex items-center justify-center p-4 z-50 ${className || ''}`}>
         <Card variant="elevated" padding="lg" className="max-w-sm w-full text-center space-y-4">
@@ -95,14 +100,6 @@ export function Scanner({ onScan, onClose, className }: ScannerProps) {
             FoodLens needs camera access to scan barcodes on food products. Your camera feed is processed on your device and never sent to our servers.
           </Body>
           <div className="space-y-2">
-            <Button
-              fullWidth
-              onClick={() => {
-                if (videoRef.current) controls.start(videoRef.current);
-              }}
-            >
-              Allow Camera Access
-            </Button>
             <Button variant="ghost" fullWidth onClick={() => router.push('/search')}>
               Search Instead
             </Button>
@@ -121,8 +118,6 @@ export function Scanner({ onScan, onClose, className }: ScannerProps) {
             </div>
           )}
         </Card>
-        {/* Hidden video element for permission request */}
-        <video ref={videoRef} className="hidden" playsInline muted aria-hidden="true" />
       </div>
     );
   }
@@ -189,21 +184,18 @@ export function Scanner({ onScan, onClose, className }: ScannerProps) {
     );
   }
 
-  // Scanning state
+  // Scanning state — html5-qrcode renders its own video feed into the container
   return (
     <div className={`fixed inset-0 bg-black flex flex-col z-50 ${className || ''}`}>
-      {/* Video feed */}
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        muted
-        aria-hidden="true"
+      {/* html5-qrcode renders the camera feed here */}
+      <div
+        id={SCANNER_CONTAINER_ID}
+        className="absolute inset-0 w-full h-full [&_video]:w-full [&_video]:h-full [&_video]:object-cover"
       />
 
       {/* Scan region overlay */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[280px] h-[160px] border-2 border-white rounded-lg opacity-80" />
+        <div className="w-[280px] h-[160px] border-2 border-white rounded-lg opacity-80 animate-pulse" />
       </div>
 
       {/* Top bar */}
