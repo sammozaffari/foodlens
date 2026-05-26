@@ -185,6 +185,9 @@ export async function searchProducts(
       json: '1',
       page_size: '24',
       page: String(page),
+      tagtype_0: 'countries',
+      tag_contains_0: 'contains',
+      tag_0: 'Australia',
     });
 
     const url = `https://world.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
@@ -217,11 +220,16 @@ export async function searchProducts(
     const data: OFFSearchResponse = await response.json();
     const allProducts: SearchResultProduct[] = (data.products || []).map(mapSearchResult);
 
-    // Deduplicate by product name + brand (OFF often has multiple barcodes for the same product)
+    // Deduplicate by normalized name + brand (strip sizes like "150g", "380g", "1kg")
+    const normalizeName = (name: string) =>
+      name.toLowerCase().trim()
+        .replace(/\d+\s*(g|kg|ml|l|oz|lb|pack|pk|x)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
     const seen = new Set<string>();
     const products = allProducts.filter((p) => {
-      const key = `${(p.name || '').toLowerCase().trim()}|${(p.brand || '').toLowerCase().trim()}`;
-      if (key === '|' || seen.has(key)) return false;
+      const key = `${normalizeName(p.name || '')}|${(p.brand || '').toLowerCase().trim()}`;
+      if (key === '|' || key.startsWith('|') || seen.has(key)) return false;
       seen.add(key);
       return true;
     });
