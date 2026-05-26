@@ -79,7 +79,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       <AllergenAlert product={product} />
 
       {/* Layer 1: Glance */}
-      <section>
+      <section className="animate-fade-in">
         <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
           <ProductImage product={product} />
           <div>
@@ -89,7 +89,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Score badges — clickable to scroll to breakdown */}
-        <div role="group" aria-label="Health scores" className="flex flex-wrap gap-3 mt-4">
+        <div role="group" aria-label="Health scores" className="flex flex-wrap gap-3 mt-5">
           <button onClick={() => scrollToSection('section-nutrition')} className="text-left cursor-pointer">
             <ScoreBadge
               type="nutriscore"
@@ -140,17 +140,19 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </section>
 
       {/* Layer 2: Detailed Breakdowns */}
-      <section className="border-t border-border pt-6 space-y-6">
+      <section className="border-t border-border pt-6 space-y-8 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
 
         {/* Nutrition Breakdown */}
-        <div id="section-nutrition" className="scroll-mt-4">
+        <div id="section-nutrition" className="scroll-mt-20">
           <Heading3>Nutrition</Heading3>
           {product.nutriScore && (
-            <Card variant="flat" padding="sm" className="mt-2 mb-3">
-              <div className="flex items-start gap-2">
-                <Mono className={`${product.nutriScore.color} text-lg font-bold`}>
-                  {product.nutriScore.grade.toUpperCase()}
-                </Mono>
+            <Card variant="flat" padding="sm" className="mt-3 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--color-primary-muted)' }}>
+                  <Mono className={`${product.nutriScore.color} text-lg font-bold`}>
+                    {product.nutriScore.grade.toUpperCase()}
+                  </Mono>
+                </div>
                 <BodySmall className="text-text-muted">
                   {getNutriScoreExplanation(product.nutriScore.grade)}
                 </BodySmall>
@@ -161,14 +163,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Processing Breakdown */}
-        <div id="section-processing" className="scroll-mt-4">
+        <div id="section-processing" className="scroll-mt-20">
           <Heading3>Processing Level</Heading3>
           {product.novaGroup ? (
-            <Card variant="flat" padding="sm" className="mt-2">
-              <div className="flex items-start gap-2">
-                <Mono className={`${product.novaGroup.color} text-lg font-bold`}>
-                  {product.novaGroup.group}
-                </Mono>
+            <Card variant="flat" padding="sm" className="mt-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'var(--color-primary-muted)' }}>
+                  <Mono className={`${product.novaGroup.color} text-lg font-bold`}>
+                    {product.novaGroup.group}
+                  </Mono>
+                </div>
                 <div>
                   <BodySmall className={product.novaGroup.color + ' font-medium'}>
                     {product.novaGroup.label}
@@ -185,10 +189,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Ingredients & Additives */}
-        <div id="section-additives" className="scroll-mt-4">
+        <div id="section-additives" className="scroll-mt-20">
           <Heading3>Ingredients</Heading3>
           {product.ingredientsText ? (
-            <Body className="mt-2 whitespace-pre-wrap text-sm">
+            <Body className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">
               {product.ingredientsText}
             </Body>
           ) : (
@@ -197,7 +201,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
           {/* Additives with descriptions */}
           {product.additivesTags.length > 0 && (
-            <div className="mt-4 space-y-2">
+            <div className="mt-5 space-y-2">
               <BodySmall className="text-text-muted font-medium">
                 {getIngredientExplanation(product.additivesCount)}
               </BodySmall>
@@ -207,18 +211,23 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
                 if (info) {
                   return (
-                    <details key={tag} className="border border-border rounded-lg overflow-hidden">
-                      <summary className="px-4 py-3 cursor-pointer hover:bg-surface flex items-center justify-between">
+                    <details key={tag} className="border border-border rounded-lg overflow-hidden group">
+                      <summary className="px-4 py-3 cursor-pointer hover:bg-surface transition-colors duration-150 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Mono className="text-sm font-medium">{info.code}</Mono>
                           <BodySmall>{info.name}</BodySmall>
                         </div>
-                        <Badge
-                          variant={info.concern === 'high' ? 'error' : info.concern === 'moderate' ? 'warning' : 'success'}
-                          size="sm"
-                        >
-                          {info.concern === 'high' ? 'High concern' : info.concern === 'moderate' ? 'Moderate' : 'Low concern'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={info.concern === 'high' ? 'error' : info.concern === 'moderate' ? 'warning' : 'success'}
+                            size="sm"
+                          >
+                            {info.concern === 'high' ? 'High concern' : info.concern === 'moderate' ? 'Moderate' : 'Low concern'}
+                          </Badge>
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-text-subtle transition-transform duration-200 group-open:rotate-180" aria-hidden="true">
+                            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </summary>
                       <div className={`px-4 py-3 border-t border-border ${getAdditiveConcernBg(info.concern)}`}>
                         <Body className="text-sm">{info.description}</Body>
@@ -231,10 +240,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 }
 
                 return (
-                  <details key={tag} className="border border-border rounded-lg overflow-hidden">
-                    <summary className="px-4 py-3 cursor-pointer hover:bg-surface flex items-center justify-between">
+                  <details key={tag} className="border border-border rounded-lg overflow-hidden group">
+                    <summary className="px-4 py-3 cursor-pointer hover:bg-surface transition-colors duration-150 flex items-center justify-between">
                       <Mono className="text-sm font-medium">{code}</Mono>
-                      <Badge variant="default" size="sm">Unknown</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" size="sm">Unknown</Badge>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-text-subtle transition-transform duration-200 group-open:rotate-180" aria-hidden="true">
+                          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                     </summary>
                     <div className="px-4 py-3 border-t border-border bg-surface">
                       <BodySmall className="text-text-muted">
@@ -252,11 +266,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {(product.allergens.length > 0 || product.traces.length > 0) && (
           <div>
             <Heading3>Allergens</Heading3>
-            <div className="mt-2 space-y-3">
+            <div className="mt-3 space-y-3">
               {product.allergens.length > 0 && (
                 <div>
-                  <Caption className="text-text-muted uppercase font-medium">Contains</Caption>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <Caption className="text-text-muted uppercase font-medium tracking-wide">Contains</Caption>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
                     {product.allergens.map((a) => (
                       <AllergenBadge key={a.id} allergen={a} />
                     ))}
@@ -265,8 +279,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
               )}
               {product.traces.length > 0 && (
                 <div>
-                  <Caption className="text-text-muted uppercase font-medium">May contain</Caption>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <Caption className="text-text-muted uppercase font-medium tracking-wide">May contain</Caption>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
                     {product.traces.map((a) => (
                       <AllergenBadge key={a.id} allergen={a} />
                     ))}

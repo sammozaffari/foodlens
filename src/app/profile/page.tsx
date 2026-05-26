@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Button, Heading2, Heading3, Body, BodySmall, Card, Badge, Caption } from '@/components/atoms';
+import { Button, Heading2, Heading3, Body, BodySmall, Card, Caption } from '@/components/atoms';
 import { AllergenProfileSetup } from '@/components/organisms/AllergenProfileSetup';
 import { useAllergenProfile } from '@/hooks/useAllergenProfile';
 import { ALLERGENS } from '@/types/product';
@@ -23,7 +23,7 @@ export default function ProfilePage() {
         <Heading3 as="h1">Allergen Profile</Heading3>
       </div>
 
-      <div className="pt-8">
+      <div className="pt-8 animate-fade-in-up">
         {!hasProfile || editing ? (
           <AllergenProfileSetup
             editMode={editing}
@@ -39,13 +39,16 @@ export default function ProfilePage() {
             </div>
 
             {allergens.length > 0 ? (
-              <div className="flex flex-wrap justify-center gap-3">
+              <div className="flex flex-wrap justify-center gap-3 animate-stagger">
                 {allergens.map((id) => {
                   const info = ALLERGENS.find((a) => a.id === id);
                   return (
-                    <Card key={id} variant="flat" padding="sm" className="border-2 border-error bg-error-muted">
-                      <Badge variant="error" size="md">{info?.label ?? id}</Badge>
-                    </Card>
+                    <div
+                      key={id}
+                      className="px-4 py-2.5 rounded-lg border-2 border-error bg-error-muted transition-transform duration-150 hover:scale-105"
+                    >
+                      <BodySmall className="text-error font-semibold">{info?.label ?? id}</BodySmall>
+                    </div>
                   );
                 })}
               </div>

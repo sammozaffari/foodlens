@@ -36,11 +36,11 @@ type SearchAction =
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center gap-3 p-3 border-b border-border">
-      <div className="w-12 h-12 rounded-md bg-surface-raised animate-pulse flex-shrink-0" />
+    <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-surface">
+      <div className="w-14 h-14 rounded-md bg-surface-raised skeleton-pulse flex-shrink-0" />
       <div className="flex-1 space-y-2">
-        <div className="w-3/4 h-4 bg-surface-raised animate-pulse rounded" />
-        <div className="w-1/2 h-3 bg-surface-raised animate-pulse rounded" />
+        <div className="w-3/4 h-4 bg-surface-raised skeleton-pulse rounded" />
+        <div className="w-1/2 h-3 bg-surface-raised skeleton-pulse rounded" />
       </div>
     </div>
   );
@@ -186,7 +186,11 @@ export function SearchResults({ query, className, onCompareToggle, compareBarcod
   // Idle state
   if (!query.trim() || state.status === 'idle') {
     return (
-      <div className={`text-center py-12 ${className || ''}`}>
+      <div className={`text-center py-16 animate-fade-in ${className || ''}`}>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-text-subtle" aria-hidden="true">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
         <Body className="text-text-muted">Search for a product by name or brand.</Body>
       </div>
     );
@@ -196,9 +200,11 @@ export function SearchResults({ query, className, onCompareToggle, compareBarcod
   if (state.status === 'loading') {
     return (
       <div className={className} aria-busy="true" aria-label="Loading results">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <SkeletonRow key={i} />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonRow key={i} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -206,8 +212,13 @@ export function SearchResults({ query, className, onCompareToggle, compareBarcod
   // Error state
   if (state.status === 'error') {
     return (
-      <div className={className} role="alert">
-        <Card variant="flat" className="text-center py-8 border-error">
+      <div className={`animate-fade-in ${className || ''}`} role="alert">
+        <Card variant="flat" className="text-center py-10 border-error">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3 text-error" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
           <Body className="text-text-muted">{state.error}</Body>
           <Button className="mt-4" onClick={handleRetry}>
             Try Again
@@ -220,7 +231,7 @@ export function SearchResults({ query, className, onCompareToggle, compareBarcod
   // Empty results
   if (state.products.length === 0) {
     return (
-      <div className={`text-center py-12 ${className || ''}`} role="status">
+      <div className={`text-center py-16 animate-fade-in ${className || ''}`} role="status">
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4 text-text-subtle" aria-hidden="true">
           <circle cx="20" cy="20" r="14" stroke="currentColor" strokeWidth="2.5"/>
           <path d="M30 30L42 42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
@@ -241,7 +252,7 @@ export function SearchResults({ query, className, onCompareToggle, compareBarcod
       <div aria-live="polite" className="sr-only">
         {state.totalResults} products found
       </div>
-      <div role="list" aria-label="Search results" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div role="list" aria-label="Search results" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 animate-stagger">
         {state.products.map((product) => (
           <div key={product.barcode} role="listitem">
             <SearchResultRow
@@ -253,7 +264,7 @@ export function SearchResults({ query, className, onCompareToggle, compareBarcod
         ))}
       </div>
       {state.hasMore && (
-        <div className="py-4 text-center">
+        <div className="py-6 text-center">
           <Button
             variant="secondary"
             onClick={handleLoadMore}

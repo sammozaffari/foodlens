@@ -61,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             }
             aria-required={props.required}
             className={cn(
-              'w-full rounded-md border bg-background text-base text-text placeholder:text-text-subtle transition-colors duration-150',
+              'w-full rounded-md border bg-background text-base text-text placeholder:text-text-subtle transition-all duration-150 shadow-sm',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               hasError
                 ? 'border-error focus-visible:border-error focus-visible:ring-error/20'

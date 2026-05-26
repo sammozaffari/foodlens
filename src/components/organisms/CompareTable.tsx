@@ -95,26 +95,26 @@ function ProductHeader({ product, barcode }: { product: Product | null; barcode:
 
 export function CompareTable({ products, barcodes }: CompareTableProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Product headers */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-6 px-6">
         <table className="w-full min-w-[480px] border-collapse" role="table" aria-label="Product comparison">
           <thead>
-            <tr>
-              <th className="text-left p-3 align-top min-w-[120px]" scope="col">
-                <Caption className="text-text-subtle uppercase">Metric</Caption>
+            <tr className="sticky top-14 z-10 bg-background">
+              <th className="text-left p-3 align-top min-w-[120px] border-b border-border" scope="col">
+                <Caption className="text-text-subtle uppercase tracking-wide">Metric</Caption>
               </th>
               {barcodes.map((barcode, i) => (
-                <th key={barcode} className="p-3 align-top" scope="col">
+                <th key={barcode} className="p-3 align-top border-b border-border" scope="col">
                   <ProductHeader product={products[i]} barcode={barcode} />
                 </th>
               ))}
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-border">
+          <tbody>
             {/* Nutri-Score */}
-            <tr>
+            <tr className="border-b border-border">
               <td className="p-3 align-middle">
                 <Heading4 as="span" className="text-sm">Nutri-Score</Heading4>
               </td>
@@ -136,7 +136,7 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
             </tr>
 
             {/* NOVA Group */}
-            <tr>
+            <tr className="border-b border-border">
               <td className="p-3 align-middle">
                 <Heading4 as="span" className="text-sm">NOVA Group</Heading4>
               </td>
@@ -158,7 +158,7 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
             </tr>
 
             {/* Ingredients / Additives */}
-            <tr>
+            <tr className="border-b border-border">
               <td className="p-3 align-middle">
                 <Heading4 as="span" className="text-sm">Additives</Heading4>
               </td>
@@ -180,7 +180,7 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
             </tr>
 
             {/* Allergens */}
-            <tr>
+            <tr className="border-b border-border">
               <td className="p-3 align-top">
                 <Heading4 as="span" className="text-sm">Allergens</Heading4>
               </td>
@@ -207,7 +207,7 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
             </tr>
 
             {/* Nutrient rows */}
-            {NUTRIENT_KEYS.map(({ name, unit }) => {
+            {NUTRIENT_KEYS.map(({ name, unit }, rowIdx) => {
               const values = products.map((product) => {
                 if (!product) return null;
                 const nutrient = findNutrient(product.nutrients, name);
@@ -215,9 +215,10 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
               });
 
               const bestIdx = getBestIndex(values, LOWER_IS_BETTER.has(name));
+              const isEven = rowIdx % 2 === 0;
 
               return (
-                <tr key={name}>
+                <tr key={name} className={`border-b border-border ${isEven ? 'bg-surface/50' : ''}`}>
                   <td className="p-3 align-middle">
                     <Body className="text-sm" as="span">{name}</Body>
                     <Caption className="text-text-subtle ml-1" as="span">per 100g</Caption>
@@ -225,10 +226,10 @@ export function CompareTable({ products, barcodes }: CompareTableProps) {
                   {values.map((value, i) => (
                     <td
                       key={barcodes[i]}
-                      className={`p-3 align-middle text-center ${bestIdx === i ? 'bg-success-muted' : ''}`}
+                      className={`p-3 align-middle text-center transition-colors ${bestIdx === i ? 'bg-success-muted' : ''}`}
                     >
                       {value !== null ? (
-                        <Mono>{value}{unit}</Mono>
+                        <Mono className={bestIdx === i ? 'font-semibold' : ''}>{value}{unit}</Mono>
                       ) : (
                         <Caption className="text-text-subtle">--</Caption>
                       )}

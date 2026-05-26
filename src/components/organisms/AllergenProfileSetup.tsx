@@ -42,7 +42,7 @@ export function AllergenProfileSetup({ onComplete, editMode = false, className }
 
   return (
     <div className={className}>
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 animate-fade-in">
         <Heading2>{editMode ? 'Edit Your Allergens' : 'Set Up Your Allergen Profile'}</Heading2>
         <Body className="text-text-muted mt-2 max-w-lg mx-auto">
           {editMode
@@ -51,7 +51,7 @@ export function AllergenProfileSetup({ onComplete, editMode = false, className }
         </Body>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-w-2xl mx-auto animate-stagger">
         {ALLERGENS.map((allergen) => {
           const isActive = selected.includes(allergen.id);
           return (
@@ -60,14 +60,14 @@ export function AllergenProfileSetup({ onComplete, editMode = false, className }
               type="button"
               role="checkbox"
               aria-checked={isActive}
-              aria-label={`${allergen.label}${isActive ? ' — selected' : ''}`}
+              aria-label={`${allergen.label}${isActive ? ' \u2014 selected' : ''}`}
               onClick={() => toggle(allergen.id)}
               className={`
-                rounded-lg border-2 p-3 text-center transition-colors duration-150 cursor-pointer
+                rounded-lg border-2 p-3 text-center transition-all duration-200 cursor-pointer
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background
                 ${isActive
-                  ? 'border-error bg-error-muted text-error'
-                  : 'border-border bg-surface text-text hover:border-text-subtle'}
+                  ? 'border-error bg-error-muted text-error scale-[1.02] shadow-sm'
+                  : 'border-border bg-surface text-text hover:border-text-subtle hover:-translate-y-0.5 hover:shadow-sm'}
               `}
             >
               <BodySmall className="font-semibold">{allergen.label}</BodySmall>
@@ -81,7 +81,7 @@ export function AllergenProfileSetup({ onComplete, editMode = false, className }
         })}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8 animate-fade-in" style={{ animationDelay: '300ms' }}>
         <Button onClick={handleSave} size="lg">
           {selected.length > 0
             ? `Save ${selected.length} Allergen${selected.length === 1 ? '' : 's'}`
@@ -95,7 +95,7 @@ export function AllergenProfileSetup({ onComplete, editMode = false, className }
       </div>
 
       {selected.length > 0 && (
-        <Card variant="flat" padding="sm" className="mt-6 max-w-md mx-auto">
+        <Card variant="flat" padding="sm" className="mt-6 max-w-md mx-auto animate-fade-in">
           <Caption className="text-text-muted">
             You will see alerts on products containing:{' '}
             <span className="text-error font-medium">

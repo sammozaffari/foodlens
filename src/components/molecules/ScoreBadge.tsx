@@ -38,7 +38,7 @@ export function ScoreBadge({
     <Card
       variant="flat"
       padding="sm"
-      className={`flex flex-col items-center gap-1 min-w-[80px] ${bgClass} ${className || ''}`}
+      className={`flex flex-col items-center gap-1 min-w-[80px] transition-shadow duration-150 hover:shadow-sm cursor-pointer ${bgClass} ${className || ''}`}
     >
       <div role="img" aria-label={ariaLabel} className="flex flex-col items-center gap-1">
         <MonoLarge className={colorClass}>{displayValue}</MonoLarge>

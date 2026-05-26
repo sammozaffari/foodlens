@@ -57,7 +57,7 @@ function SearchContent() {
   return (
     <>
       {/* Top bar */}
-      <div className="flex items-center gap-3 py-3 border-b border-border">
+      <div className="flex items-center gap-3 py-3 border-b border-border animate-fade-in">
         <Button
           variant="ghost"
           size="sm"
@@ -75,17 +75,19 @@ function SearchContent() {
       </div>
 
       {/* Search bar */}
-      <div className="py-4">
-        <SearchBar
-          value={searchInput}
-          onChange={handleSearchChange}
-          autoFocus
-          placeholder="Search for food products..."
-        />
+      <div className="py-5 animate-fade-in" style={{ animationDelay: '50ms' }}>
+        <div className="relative">
+          <SearchBar
+            value={searchInput}
+            onChange={handleSearchChange}
+            autoFocus
+            placeholder="Search for food products..."
+          />
+        </div>
       </div>
 
       {/* Results — extra bottom padding when compare bar is visible */}
-      <div className={compareList.barcodes.length >= 2 ? 'pb-20' : ''}>
+      <div className={`animate-fade-in ${compareList.barcodes.length >= 2 ? 'pb-20' : ''}`} style={{ animationDelay: '100ms' }}>
         <SearchResults
           query={debouncedQuery}
           onCompareToggle={handleCompareToggle}
@@ -110,7 +112,7 @@ export default function SearchPage() {
     <main className="max-w-4xl mx-auto px-6 min-h-screen">
       <Suspense fallback={
         <div className="py-3 border-b border-border">
-          <div className="w-20 h-5 bg-surface-raised animate-pulse rounded" />
+          <div className="w-20 h-5 bg-surface-raised skeleton-pulse rounded" />
         </div>
       }>
         <SearchContent />

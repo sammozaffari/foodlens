@@ -86,7 +86,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         <Heading3 as="h1">Compare</Heading3>
       </div>
 
-      <div className="pt-6">
+      <div className="pt-6 animate-fade-in">
         <CompareTable products={products} barcodes={barcodes} />
       </div>
     </main>

@@ -13,7 +13,7 @@ interface NutritionPanelProps {
 const SUB_NUTRIENTS = new Set(['Saturated fat', 'Sugars']);
 
 function formatValue(value: number | null): string {
-  if (value === null) return '—';
+  if (value === null) return '\u2014';
   if (value < 0.1 && value > 0) return '<0.1';
   return value.toFixed(1);
 }
@@ -31,14 +31,14 @@ export function NutritionPanel({ nutrients, servingSize, className }: NutritionP
 
   return (
     <Card variant="flat" className={className}>
-      <div className="flex items-center justify-between border-b border-border pb-2 mb-2">
+      <div className="flex items-center justify-between border-b border-border pb-3 mb-1">
         <div>
           <Heading4>Nutrition Facts</Heading4>
           {servingSize && (
-            <Caption className="text-text-muted">Serving size: {servingSize}</Caption>
+            <Caption className="text-text-muted mt-0.5">Serving size: {servingSize}</Caption>
           )}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 bg-surface-raised rounded-md p-0.5">
           <Button
             variant={view === 'serving' ? 'primary' : 'ghost'}
             size="sm"
@@ -58,16 +58,17 @@ export function NutritionPanel({ nutrients, servingSize, className }: NutritionP
         </div>
       </div>
 
-      <div className="divide-y divide-border" role="table" aria-label="Nutrition information">
-        {nutrients.map((nutrient) => {
+      <div role="table" aria-label="Nutrition information">
+        {nutrients.map((nutrient, i) => {
           const isIndented = SUB_NUTRIENTS.has(nutrient.name);
           const displayValue = view === '100g' ? nutrient.per100g : nutrient.perServing;
+          const isEven = i % 2 === 0;
 
           return (
             <div
               key={nutrient.name}
               role="row"
-              className="flex items-center justify-between py-2"
+              className={`flex items-center justify-between py-2.5 px-2 rounded ${isEven ? 'bg-surface' : ''}`}
             >
               <span
                 role="cell"
