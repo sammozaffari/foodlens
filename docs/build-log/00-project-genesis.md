@@ -5,115 +5,104 @@
 
 ---
 
-## How This Project Was Born
+## The Problem I Saw
 
-FoodLens started not from a product idea, but from a systematic analysis of what employers want.
+I'm someone who reads ingredient labels. I flip the packet, squint at the fine print, Google the additive numbers, and try to make sense of it all in a supermarket aisle with two kids and a trolley full of contradictions.
 
-### Step 1: Built a Job Intelligence System (Scout)
+Australia is the allergy capital of the world — over 5 million people living with allergic disease. I watched my partner navigate a coeliac diagnosis with zero adequate tooling. Every app we tried either didn't recognise Australian products, scored things using European standards that don't apply here, or was so out of date it was useless.
 
-Before deciding what to build, we built a tool to understand the market. Scout scrapes LinkedIn daily for UX/product/service/experience design jobs in Sydney, scores them for AI relevance, and analyses the full corpus for patterns.
+When I actually researched the space, the gap was staggering:
 
-**What Scout found across 66 active Sydney JDs:**
-- 77% mention stakeholder management
-- 64% mention information architecture
-- 62% mention AI/ML
-- 38% mention design systems
-- 36% mention service design
-- 33% of roles now expect AI fluency
-- Financial services dominates (61% of roles)
-- "End to end" appears 56 times -- employers want full-lifecycle designers
+- **Yuka** (80M users) doesn't understand Health Star Ratings and suggests European alternatives you can't buy here
+- **FoodSwitch** (the only AU-specific option) recognised 1 in 3 products in testing
+- **MyFitnessPal** imploded in 2025 — paywalled barcode scanning, 3-5 second lag per screen, user revolt
+- **Not a single platform** combines ingredient transparency with community features
 
-### Step 2: Gap Analysis Against My Portfolio
-
-Scout diffed the corpus against my existing portfolio, CV, and LinkedIn profile.
-
-**The finding: I have a labeling problem AND a content gap.**
-
-My two case studies prove deep research and service design capability. But they don't demonstrate:
-- Product design (0→1 product thinking) -- 32 JDs ask for this
-- Information architecture -- 64 JDs, most demanded skill
-- Design systems -- 38% of roles
-- Interaction design -- 15 JDs
-- Coded prototypes -- strong market signal
-
-**The recommendation:** Build a self-directed product project that demonstrates the full UX process from research through shipped code.
-
-### Step 3: Choosing the Project
-
-We evaluated three directions:
-1. A design system / component library for AI interfaces
-2. A 0→1 SaaS product (full UX process)
-3. A small public utility tool
-
-**Decision: Option B** -- a full product build documents every skill employers want to see. The build process itself becomes the case study.
-
-### Step 4: Why Food Transparency
-
-I'd already done extensive research into the Australian food transparency space and identified a genuine market gap:
-- Australia is the allergy capital of the world (5M+ people)
-- No app combines ingredient analysis + allergen detection + macro tracking for AU
-- The $148B grocery market is served by fragmented, failing tools
-- Regulatory tailwinds (mandatory HSR, PEAL allergen labelling)
-
-The research brief (see `docs/research/brief.md`) covers the full competitive landscape, user pain points, technical feasibility, and market opportunity.
-
-### Step 5: Adopting the 7-Agent Software Factory
-
-Instead of vibe-coding, we adopted a structured development process:
-
-1. **Researcher** -- maps codebase before any feature work (read-only)
-2. **Story Writer** -- turns ideas into user stories with acceptance criteria
-3. **Spec Writer** -- turns stories into technical briefs
-4. **Backend Builder** -- implements API routes and business logic
-5. **Frontend Builder** -- implements components and pages
-6. **Test Verifier** -- writes acceptance tests against the user story
-7. **Validator** -- compares implementation against approved story/brief
-
-Three human checkpoints: story approval, brief approval, PR review.
-
-This process itself demonstrates how a designer uses AI agents to ship production code -- a direct answer to the "AI fluency" that 33% of Sydney employers now expect.
-
-### Step 6: MVP Scope
-
-We scoped the MVP to be buildable in a focused sprint while demonstrating all the portfolio gaps:
-
-- **Barcode scanner** (camera UX, interaction design)
-- **Product search** (IA, search patterns)
-- **Product card** (visual design, data display, allergen flagging)
-- **Design system** (tokens, component library)
-- **PWA** (offline capability, install prompt)
-
-Each feature runs through the full 7-agent factory chain, with the build log documenting every decision.
+The $148 billion Australian grocery market is served by tools that are fragmented, inaccurate, or hostile to users.
 
 ---
 
-## What This Case Study Will Show
+## The Opportunity
 
-| Employer Need | How FoodLens Demonstrates It |
-|---------------|------------------------------|
-| Product design (32 JDs) | Full 0→1 product with documented decisions |
-| Information architecture (64 JDs) | Sitemap, content model, data architecture |
-| Interaction design (15 JDs) | Camera scanning UX, search, card interactions |
-| Design systems (38%) | Token-based component library, documented |
-| AI/ML capability (62 JDs) | 7-agent factory build process |
-| Experimentation (13 JDs) | Design decisions with rationale |
-| Coded prototypes (market signal) | Shipped, deployed, working product |
-| Accessibility (27%) | WCAG 2.1 AA throughout |
+This isn't just a consumer tool. It's an intelligence platform.
+
+If you build a trusted food transparency app that hundreds of thousands of Australians use daily, you're sitting on the most valuable dataset in the grocery industry: what real people actually want to eat, what they avoid, what gaps they see in supermarket shelves.
+
+**The consumer side:** Scan a product, understand what's in it, find better alternatives.
+
+**The B2B side:** Aggregate anonymised demand signals and sell them to the manufacturers and supermarkets who make those products. When 3,000 users search for "celiac-safe muesli bars under $1 with no added sugar" and find nothing — that's a new product development brief worth money.
+
+Regulatory tailwinds are accelerating this: mandatory Health Star Ratings are in legislative preparation, PEAL allergen labelling requirements took effect February 2026, and added sugar labelling is in consultation.
+
+---
+
+## Why I'm Building It Myself
+
+I'm a designer who can research, prototype, and ship. This project proves it — not with a mock-up, but with a working product that solves a real problem for a real market.
+
+The research brief (see `docs/research/brief.md`) covers the full competitive landscape, user pain points, technical feasibility, and market sizing in detail.
+
+---
+
+## Development Approach: 7-Agent Software Factory
+
+Rather than the usual AI coding loop (prompt → generate → error → patch → repeat), I'm using a structured agent system that mirrors how real engineering teams work:
+
+1. **Researcher** — maps codebase before any feature work (read-only)
+2. **Story Writer** — turns ideas into user stories with acceptance criteria
+3. **Spec Writer** — turns stories into technical briefs
+4. **Backend Builder** — implements API routes and business logic
+5. **Frontend Builder** — implements components and pages
+6. **Test Verifier** — writes acceptance tests against the user story
+7. **Validator** — compares implementation against approved story/brief
+
+Three human checkpoints: story approval, brief approval, PR review.
+
+Each agent gets one focused job with a clean context window. Mistakes get caught at the brief stage — not after 10 files have been changed.
+
+---
+
+## MVP Scope
+
+The first release is intentionally focused:
+
+- **Barcode scanner** — camera access, real-time barcode detection
+- **Product search** — text search with autocomplete
+- **Product card** — ingredients, nutrition, allergens, Health Star Rating, NOVA classification
+- **Design system** — token-based component library built from scratch
+- **PWA** — works offline, installs to home screen
+
+Each feature runs through the full factory chain, with decisions documented as we go.
 
 ---
 
 ## Technology Choices
 
-| Choice | Rationale |
-|--------|-----------|
-| Next.js 15 (App Router) | Industry standard, server components, API routes |
-| TypeScript strict | Type safety, shows engineering rigour |
-| Tailwind CSS | Utility-first, design token integration |
-| PWA | No app store friction, offline capability |
-| ZXing-js | Most mature JS barcode library, Apache 2.0 |
-| Open Food Facts API | Free, open, 22,500+ AU products |
-| Vercel | Zero-config Next.js deployment |
+| Choice | Why |
+|--------|-----|
+| Next.js 15 (App Router) | Server components for API security, industry standard |
+| TypeScript strict | Type safety across the full stack |
+| Tailwind CSS | Utility-first, integrates with design tokens |
+| PWA | No app store friction, offline-first for supermarket aisles |
+| ZXing-js | Most mature JS barcode library (Apache 2.0) |
+| Open Food Facts API | Free, open, 22,500+ AU products, growing |
+| Vercel | Zero-config deployment for Next.js |
+
+---
+
+## What Comes After MVP
+
+The long-term vision is an AI-powered food intelligence layer:
+
+- **AI Product Hunter** — proactive research on behalf of users (find me healthy muesli bars under $1)
+- **Continuous monitoring** — alert when favourited products reformulate
+- **Budget-aware recommendations** — optimise for health within a weekly grocery budget
+- **Community features** — reviews, discussions, recipe sharing, crowdsourced verification
+- **B2B intelligence** — consumer demand gap reports sold to manufacturers and retailers
+- **MCP server** — let any AI assistant query Australian food data through our platform
+
+But first: ship the MVP. Prove the scanner works. Prove the product card is useful. Prove real people want this.
 
 ## Next Step
 
-Phase 1: Establish the design system foundation (tokens, core components, IA documentation) before building any features.
+Phase 1: Establish the design system foundation (tokens, core components, IA) before building any features.
