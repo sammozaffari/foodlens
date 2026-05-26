@@ -134,40 +134,53 @@ const ALLERGEN_LABELS: Record<AllergenId, string> = {
 // ---------- Exported functions ----------
 
 export async function getProduct(barcode: string): Promise<ProductApiResponse> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), PRODUCT_TIMEOUT);
-
-  try {
-    const url = `https://au.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`;
-    const response = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT },
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      return { status: 'error', product: null, error: `HTTP ${response.status}` };
-    }
-
-    const data: OFFProductResponse = await response.json();
-
-    if (data.status === 0 || !data.product) {
-      return { status: 'not_found', product: null };
-    }
-
-    const product = mapProduct(data.product, barcode);
-    return { status: 'found', product };
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      return { status: 'error', product: null, error: 'Request timed out. Please try again.' };
-    }
-    return {
-      status: 'error',
-      product: null,
-      error: 'Unable to reach food database. Check your connection.',
-    };
-  } finally {
-    clearTimeout(timeout);
+  // Try original barcode, then zero-padded to 13 digits
+  const barcodes = [barcode];
+  if (barcode.length < 13) {
+    barcodes.push(barcode.padStart(13, '0'));
   }
+
+  for (const bc of barcodes) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), PRODUCT_TIMEOUT);
+
+    try {
+      const url = `https://au.openfoodfacts.org/api/v2/product/${bc}.json?fields=${PRODUCT_FIELDS}`;
+      const response = await fetch(url, {
+        headers: { 'User-Agent': USER_AGENT },
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        clearTimeout(timeout);
+        continue;
+      }
+
+      const data: OFFProductResponse = await response.json();
+      clearTimeout(timeout);
+
+      if (data.status === 0 || !data.product) {
+        continue;
+      }
+
+      // Check we got meaningful data (not just an empty shell)
+      const raw = data.product;
+      if (!raw.product_name && !raw.ingredients_text && !raw.nutriscore_grade) {
+        continue;
+      }
+
+      const product = mapProduct(raw, barcode);
+      return { status: 'found', product };
+    } catch (error) {
+      clearTimeout(timeout);
+      if (error instanceof Error && error.name === 'AbortError') {
+        continue;
+      }
+      continue;
+    }
+  }
+
+  return { status: 'not_found', product: null };
 }
 
 export async function searchProducts(

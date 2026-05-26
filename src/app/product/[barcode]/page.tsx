@@ -2,11 +2,70 @@ import { cache } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getProduct } from '@/lib/api/openfoodfacts';
+import { searchWoolworths } from '@/lib/api/woolworths';
 import { Button, Heading3, Body } from '@/components/atoms';
 import { ProductCard } from '@/components/organisms';
 import { BackButton } from './BackButton';
 
-const getCachedProduct = cache((barcode: string) => getProduct(barcode));
+const getCachedProduct = cache(async (barcode: string) => {
+  // Fetch OFF and Woolworths in parallel
+  const [offResult, woolworthsResult] = await Promise.all([
+    getProduct(barcode),
+    searchWoolworths(barcode).catch(() => null),
+  ]);
+
+  // Enrich OFF product with Woolworths pricing
+  if (offResult.status === 'found' && offResult.product) {
+    const wp = woolworthsResult?.results?.find(
+      (r) => String(r.barcode) === barcode || String(r.barcode).padStart(13, '0') === barcode.padStart(13, '0')
+    );
+    if (wp) {
+      offResult.product.woolworthsPrice = wp.current_price ?? null;
+      offResult.product.woolworthsUrl = wp.url || null;
+      offResult.product.productSize = wp.product_size || null;
+      // Use Woolworths name/brand if OFF name is empty
+      if (!offResult.product.name || offResult.product.name === 'Unknown product') {
+        offResult.product.name = wp.product_name;
+      }
+      if (!offResult.product.brand || offResult.product.brand === 'Unknown brand') {
+        offResult.product.brand = wp.product_brand;
+      }
+    }
+  }
+
+  // If OFF didn't find it but Woolworths did, create a minimal product from Woolworths data
+  if (offResult.status === 'not_found' && woolworthsResult?.results?.length) {
+    const wp = woolworthsResult.results[0];
+    return {
+      status: 'found' as const,
+      product: {
+        barcode,
+        name: wp.product_name,
+        brand: wp.product_brand || 'Unknown brand',
+        imageUrl: null,
+        imageSmallUrl: null,
+        nutriScore: null,
+        healthStarRating: null,
+        novaGroup: null,
+        ingredientScore: null,
+        ingredientsText: null,
+        additivesTags: [],
+        additivesCount: 0,
+        allergens: [],
+        traces: [],
+        servingSize: null,
+        nutrients: [],
+        woolworthsPrice: wp.current_price ?? null,
+        woolworthsUrl: wp.url || null,
+        productSize: wp.product_size || null,
+        dataSource: 'openfoodfacts' as const,
+        lastUpdated: null,
+      },
+    };
+  }
+
+  return offResult;
+});
 
 interface ProductPageProps {
   params: Promise<{ barcode: string }>;
