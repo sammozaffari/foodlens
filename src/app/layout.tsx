@@ -22,8 +22,23 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FoodLens",
-  description: "Australian Food Transparency Platform",
+  title: "FoodLens — Know what's in your food",
+  description: "Scan or search any product for ingredients, additives, allergens, and nutrition. Evidence-based. Built for Australia.",
+  metadataBase: new URL("https://foodlens.vercel.app"),
+  openGraph: {
+    title: "FoodLens — Know what's in your food",
+    description: "Scan or search any product for ingredients, additives, allergens, and nutrition.",
+    type: "website",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "FoodLens",
+  },
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/icon-192.png",
+  },
 };
 
 export default function RootLayout({
@@ -36,6 +51,10 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} ${sourceSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
         <Navigation />
         {children}
