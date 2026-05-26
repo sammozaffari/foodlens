@@ -2,3 +2,7 @@ export { Scanner } from './Scanner';
 export { ProductCard } from './ProductCard';
 export { NutritionPanel } from './NutritionPanel';
 export { SearchResults } from './SearchResults';
+export { AllergenAlert } from './AllergenAlert';
+export { AllergenProfileSetup } from './AllergenProfileSetup';
+export { AllergenProfileCTA } from './AllergenProfileCTA';
+export { Navigation } from './Navigation';

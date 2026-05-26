@@ -4,6 +4,7 @@ import { searchProducts } from '@/lib/api/openfoodfacts';
 import type { SearchResultProduct } from '@/types/product';
 import { Card, Badge, Display, Heading2, Heading3, Body, BodySmall, Caption, Mono } from '@/components/atoms';
 import { HeroSearch } from '@/components/molecules';
+import { AllergenProfileCTA } from '@/components/organisms/AllergenProfileCTA';
 
 // ---------- Data ----------
 
@@ -90,6 +91,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Allergen Profile CTA — only shows if no profile set */}
+      <AllergenProfileCTA />
 
       {/* Section 2: How It Works */}
       <section className="py-16 border-t border-border">
@@ -328,6 +332,7 @@ export default async function HomePage() {
           <nav className="flex gap-6" aria-label="Footer navigation">
             <Link href="/search" className="text-sm text-text-muted hover:text-text transition-colors">Search</Link>
             <Link href="/scan" className="text-sm text-text-muted hover:text-text transition-colors">Scan</Link>
+            <Link href="/profile" className="text-sm text-text-muted hover:text-text transition-colors">Profile</Link>
           </nav>
         </div>
       </footer>

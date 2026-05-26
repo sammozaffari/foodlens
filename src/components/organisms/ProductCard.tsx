@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Badge, Card, Heading2, Heading3, Body, BodySmall, Caption, Mono } from '@/components/atoms';
 import { ScoreBadge, AllergenBadge } from '@/components/molecules';
 import { NutritionPanel } from './NutritionPanel';
+import { AllergenAlert } from './AllergenAlert';
 import type { Product } from '@/types/product';
 import {
   getNutriScoreExplanation,
@@ -12,7 +13,6 @@ import {
   getIngredientExplanation,
   getAdditiveInfo,
   getAdditiveConcernBg,
-  getAdditiveConcernColor,
 } from '@/types/product';
 
 interface ProductCardProps {
@@ -75,6 +75,9 @@ function scrollToSection(id: string) {
 export function ProductCard({ product, className }: ProductCardProps) {
   return (
     <div className={`space-y-6 ${className || ''}`}>
+      {/* Allergen profile alert — first thing users see */}
+      <AllergenAlert product={product} />
+
       {/* Layer 1: Glance */}
       <section>
         <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Source_Sans_3, JetBrains_Mono } from "next/font/google";
+import { Navigation } from "@/components/organisms/Navigation";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -36,6 +37,7 @@ export default function RootLayout({
       className={`${outfit.variable} ${sourceSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
+        <Navigation />
         {children}
       </body>
     </html>
