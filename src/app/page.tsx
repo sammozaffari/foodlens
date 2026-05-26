@@ -2,7 +2,8 @@ export const revalidate = 3600;
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { searchProducts } from '@/lib/api/openfoodfacts';
+import { searchWoolworths } from '@/lib/api/woolworths';
+import { getProductScores } from '@/lib/api/openfoodfacts';
 import type { SearchResultProduct } from '@/types/product';
 import { Card, Badge, Display, Heading2, Heading3, Body, BodySmall, Caption, Mono } from '@/components/atoms';
 import { HeroSearch } from '@/components/molecules';
@@ -38,20 +39,43 @@ async function getAustralianProducts(): Promise<SearchResultProduct[]> {
   for (const query of AU_QUERIES) {
     if (products.length >= 12) break;
     try {
-      const result = await searchProducts(query, 1);
-      if (result.status === 'ok' && result.data) {
+      const result = await searchWoolworths(query, 1, 4);
+      if (result && result.results) {
         let added = 0;
-        for (const p of result.data.products) {
+        for (const wp of result.results) {
           if (added >= 2 || products.length >= 12) break;
-          const key = `${normalizeName(p.name || '')}|${(p.brand || '').toLowerCase().trim()}`;
+          const key = `${normalizeName(wp.product_name || '')}|${(wp.product_brand || '').toLowerCase().trim()}`;
           if (key === '|' || key.startsWith('|') || seen.has(key)) continue;
           seen.add(key);
-          products.push(p);
+          products.push({
+            barcode: String(wp.barcode),
+            name: wp.product_name,
+            brand: wp.product_brand || 'Unknown brand',
+            imageSmallUrl: null, // Will enrich below
+            nutriScoreGrade: null,
+            novaGroup: null,
+            price: wp.current_price ?? null,
+            size: wp.product_size || null,
+            woolworthsUrl: wp.url || null,
+          });
           added++;
         }
       }
     } catch {
       // Skip failed queries, continue with next
+    }
+  }
+
+  // Enrich with OFF scores and images in parallel
+  const offData = await Promise.all(
+    products.map((p) => getProductScores(p.barcode))
+  );
+  for (let i = 0; i < products.length; i++) {
+    const off = offData[i];
+    if (off) {
+      products[i].imageSmallUrl = off.imageSmallUrl;
+      products[i].nutriScoreGrade = off.nutriScoreGrade;
+      products[i].novaGroup = off.novaGroup;
     }
   }
 
@@ -263,6 +287,11 @@ export default async function HomePage() {
                     </div>
                     <BodySmall className="font-medium line-clamp-2 flex-1">{product.name}</BodySmall>
                     <Caption className="text-text-muted mt-1">{product.brand}</Caption>
+                    {product.price != null && (
+                      <Mono className="text-text text-sm font-semibold mt-1 block">
+                        ${product.price.toFixed(2)}{product.size ? ` · ${product.size}` : ''}
+                      </Mono>
+                    )}
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {product.nutriScoreGrade && (
                         <Badge

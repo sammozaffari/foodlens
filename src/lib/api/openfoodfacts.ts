@@ -260,6 +260,47 @@ export async function searchProducts(
   }
 }
 
+/**
+ * Lightweight barcode lookup — returns only the fields needed for search result display.
+ * Used to enrich Woolworths search results with OFF nutrition scores and images.
+ */
+export async function getProductScores(barcode: string): Promise<{
+  nutriScoreGrade: NutriScoreGrade | null;
+  novaGroup: NovaGroup | null;
+  imageSmallUrl: string | null;
+} | null> {
+  try {
+    const fields = 'nutriscore_grade,nova_group,image_small_url';
+    const url = `https://au.openfoodfacts.org/api/v2/product/${barcode}.json?fields=${fields}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
+    const response = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) return null;
+
+    const data: OFFProductResponse = await response.json();
+    if (data.status === 0 || !data.product) return null;
+
+    const raw = data.product;
+    return {
+      nutriScoreGrade: isValidNutriScoreGrade(raw.nutriscore_grade)
+        ? (raw.nutriscore_grade as NutriScoreGrade)
+        : null,
+      novaGroup: isValidNovaGroup(raw.nova_group)
+        ? (raw.nova_group as NovaGroup)
+        : null,
+      imageSmallUrl: raw.image_small_url || null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ---------- Internal mappers ----------
 
 function mapProduct(raw: OFFProductRaw, barcode: string): Product {
@@ -288,6 +329,10 @@ function mapProduct(raw: OFFProductRaw, barcode: string): Product {
     servingSize: raw.serving_size || null,
     nutrients: mapNutrients(raw.nutriments || {}),
 
+    woolworthsPrice: null,
+    woolworthsUrl: null,
+    productSize: null,
+
     dataSource: 'openfoodfacts',
     lastUpdated: null,
   };
@@ -306,6 +351,9 @@ function mapSearchResult(raw: OFFProductRaw & { code?: string }): SearchResultPr
     imageSmallUrl: raw.image_small_url || null,
     nutriScoreGrade: grade,
     novaGroup: nova,
+    price: null,
+    size: null,
+    woolworthsUrl: null,
   };
 }
 

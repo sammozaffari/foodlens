@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BodySmall, Caption, Card } from '@/components/atoms';
+import { BodySmall, Caption, Card, Mono } from '@/components/atoms';
 import { CompareButton } from './CompareButton';
 import type { SearchResultProduct } from '@/types/product';
 import { getNutriScoreColor, getNutriScoreBgColor } from '@/types/product';
@@ -66,6 +66,11 @@ export function SearchResultRow({ product, className, onCompareToggle, isCompare
           <Caption className="text-text-muted mt-0.5 truncate block">
             {product.brand}
           </Caption>
+          {product.price != null && (
+            <Mono className="text-text text-sm font-semibold mt-1 block">
+              ${product.price.toFixed(2)}{product.size ? ` · ${product.size}` : ''}
+            </Mono>
+          )}
         </div>
 
         {/* Bottom row: badges + compare */}

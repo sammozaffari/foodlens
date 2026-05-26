@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { Badge, Card, Heading2, Heading3, Body, BodySmall, Caption, Mono } from '@/components/atoms';
+import { Badge, Button, Card, Heading2, Heading3, Body, BodySmall, Caption, Mono } from '@/components/atoms';
 import { ScoreBadge, AllergenBadge } from '@/components/molecules';
 import { NutritionPanel } from './NutritionPanel';
 import { AllergenAlert } from './AllergenAlert';
@@ -86,6 +86,24 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div>
             <Heading2>{product.name}</Heading2>
             <BodySmall className="text-text-muted mt-1">{product.brand}</BodySmall>
+            {product.woolworthsPrice != null && (
+              <Mono className="text-text text-lg font-bold mt-2 block">
+                ${product.woolworthsPrice.toFixed(2)}{product.productSize ? ` · ${product.productSize}` : ''}
+              </Mono>
+            )}
+            {product.woolworthsUrl && (
+              <a
+                href={product.woolworthsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-3"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Button variant="secondary" size="sm">
+                  View on Woolworths
+                </Button>
+              </a>
+            )}
           </div>
         </div>
 
@@ -296,7 +314,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Data source */}
       <Card variant="flat" padding="sm">
         <Caption className="text-text-subtle">
-          Data from Open Food Facts — an open, community-maintained food database.
+          Nutrition data from Open Food Facts. Pricing from Woolworths.
         </Caption>
       </Card>
     </div>

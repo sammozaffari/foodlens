@@ -136,6 +136,10 @@ export interface Product {
   servingSize: string | null;
   nutrients: Nutrient[];
 
+  woolworthsPrice: number | null;
+  woolworthsUrl: string | null;
+  productSize: string | null;
+
   dataSource: 'openfoodfacts';
   lastUpdated: string | null;
 }
@@ -149,6 +153,9 @@ export interface SearchResultProduct {
   imageSmallUrl: string | null;
   nutriScoreGrade: NutriScoreGrade | null;
   novaGroup: NovaGroup | null;
+  price: number | null;
+  size: string | null;
+  woolworthsUrl: string | null;
 }
 
 export interface SearchResponse {
