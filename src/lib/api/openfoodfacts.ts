@@ -185,7 +185,9 @@ export async function searchProducts(
       json: '1',
       page_size: '20',
       page: String(page),
-      countries_tags_en: 'australia',
+      tagtype_0: 'countries',
+      tag_contains_0: 'contains',
+      tag_0: 'australia',
     });
 
     const url = `https://world.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
