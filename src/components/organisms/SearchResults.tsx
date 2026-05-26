@@ -1,0 +1,194 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Body, BodySmall, Button, Heading3 } from '@/components/atoms';
+import { Card } from '@/components/atoms';
+import { SearchResultRow } from '@/components/molecules';
+import type { SearchResultProduct, SearchApiResponse } from '@/types/product';
+
+interface SearchResultsProps {
+  query: string;
+  className?: string;
+}
+
+type Status = 'idle' | 'loading' | 'success' | 'error';
+
+interface SearchState {
+  status: Status;
+  products: SearchResultProduct[];
+  hasMore: boolean;
+  totalResults: number;
+  page: number;
+  error: string | null;
+}
+
+function SkeletonRow() {
+  return (
+    <div className="flex items-center gap-3 p-3 border-b border-border">
+      <div className="w-12 h-12 rounded-md bg-surface-raised animate-pulse flex-shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="w-3/4 h-4 bg-surface-raised animate-pulse rounded" />
+        <div className="w-1/2 h-3 bg-surface-raised animate-pulse rounded" />
+      </div>
+    </div>
+  );
+}
+
+export function SearchResults({ query, className }: SearchResultsProps) {
+  const [state, setState] = useState<SearchState>({
+    status: 'idle',
+    products: [],
+    hasMore: false,
+    totalResults: 0,
+    page: 1,
+    error: null,
+  });
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastFetchedQuery, setLastFetchedQuery] = useState('');
+
+  // Derived loading state: if query changed since last fetch, we need to fetch
+  const needsFetch = query.trim() !== '' && query !== lastFetchedQuery;
+
+  // Trigger initial fetch via a rendered effect-free mechanism
+  // We'll use a "fetch on first render when needed" approach
+  if (needsFetch && state.status !== 'loading') {
+    // Synchronously set loading state and kick off fetch
+    const newState: SearchState = { ...state, status: 'loading', products: [], error: null };
+    setState(newState);
+    setLastFetchedQuery(query);
+
+    fetch(`/api/search?q=${encodeURIComponent(query)}&page=1`)
+      .then((res) => res.json())
+      .then((data: SearchApiResponse) => {
+        if (data.status === 'ok' && data.data) {
+          setState({
+            status: 'success',
+            products: data.data.products,
+            hasMore: data.data.hasMore,
+            totalResults: data.data.totalResults,
+            page: 1,
+            error: null,
+          });
+        } else {
+          setState((prev) => ({ ...prev, status: 'error', error: data.error || 'Something went wrong.' }));
+        }
+      })
+      .catch(() => {
+        setState((prev) => ({ ...prev, status: 'error', error: 'Unable to reach food database.' }));
+      });
+  }
+
+  // Reset to idle if query cleared
+  if (!query.trim() && state.status !== 'idle') {
+    setState({ status: 'idle', products: [], hasMore: false, totalResults: 0, page: 1, error: null });
+    setLastFetchedQuery('');
+  }
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    const nextPage = state.page + 1;
+
+    fetch(`/api/search?q=${encodeURIComponent(query)}&page=${nextPage}`)
+      .then((res) => res.json())
+      .then((data: SearchApiResponse) => {
+        if (data.status === 'ok' && data.data) {
+          setState((prev) => ({
+            ...prev,
+            products: [...prev.products, ...data.data!.products],
+            hasMore: data.data!.hasMore,
+            totalResults: data.data!.totalResults,
+            page: nextPage,
+          }));
+        }
+      })
+      .finally(() => setLoadingMore(false));
+  };
+
+  const handleRetry = () => {
+    setLastFetchedQuery(''); // Will trigger re-fetch on next render
+  };
+
+  // Idle state
+  if (!query.trim() || state.status === 'idle') {
+    return (
+      <div className={`text-center py-12 ${className || ''}`}>
+        <Body className="text-text-muted">Search for a product by name or brand.</Body>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (state.status === 'loading') {
+    return (
+      <div className={className} aria-busy="true" aria-label="Loading results">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <SkeletonRow key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  // Error state
+  if (state.status === 'error') {
+    return (
+      <div className={className} role="alert">
+        <Card variant="flat" className="text-center py-8 border-error">
+          <Body className="text-text-muted">{state.error}</Body>
+          <Button className="mt-4" onClick={handleRetry}>
+            Try Again
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Empty results
+  if (state.products.length === 0) {
+    return (
+      <div className={`text-center py-12 ${className || ''}`} role="status">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4 text-text-subtle" aria-hidden="true">
+          <circle cx="20" cy="20" r="14" stroke="currentColor" strokeWidth="2.5"/>
+          <path d="M30 30L42 42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+          <path d="M15 20H25" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+        <Heading3>No products found</Heading3>
+        <Body className="text-text-muted mt-2">Try a different search term or scan the barcode.</Body>
+        <Link href="/scan">
+          <Button variant="secondary" className="mt-4">Scan a Barcode</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  // Results
+  return (
+    <div className={className}>
+      <div aria-live="polite" className="sr-only">
+        {state.totalResults} products found
+      </div>
+      <div role="list" aria-label="Search results">
+        {state.products.map((product) => (
+          <div key={product.barcode} role="listitem">
+            <SearchResultRow product={product} />
+          </div>
+        ))}
+      </div>
+      {state.hasMore && (
+        <div className="py-4 text-center">
+          <Button
+            variant="secondary"
+            onClick={handleLoadMore}
+            loading={loadingMore}
+            aria-label="Load more results"
+          >
+            Load more
+          </Button>
+        </div>
+      )}
+      <BodySmall className="text-center text-text-subtle py-2">
+        {state.totalResults} results
+      </BodySmall>
+    </div>
+  );
+}
