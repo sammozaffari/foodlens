@@ -1,26 +1,133 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colors */
+  --color-background: oklch(0.99 0.002 90);
+  --color-surface: oklch(0.96 0.004 90);
+  --color-surface-raised: oklch(0.93 0.006 90);
+  --color-text: oklch(0.15 0.01 60);
+  --color-text-muted: oklch(0.45 0.01 60);
+  --color-text-subtle: oklch(0.62 0.01 60);
+  --color-primary: oklch(0.45 0.12 170);
+  --color-primary-hover: oklch(0.40 0.12 170);
+  --color-primary-active: oklch(0.35 0.12 170);
+  --color-primary-muted: oklch(0.92 0.04 170);
+  --color-success: oklch(0.55 0.15 145);
+  --color-success-muted: oklch(0.93 0.04 145);
+  --color-warning: oklch(0.70 0.15 75);
+  --color-warning-muted: oklch(0.94 0.04 75);
+  --color-error: oklch(0.55 0.18 25);
+  --color-error-muted: oklch(0.94 0.04 25);
+  --color-info: oklch(0.55 0.12 240);
+  --color-info-muted: oklch(0.93 0.04 240);
+  --color-border: oklch(0.88 0.005 90);
+  --color-border-strong: oklch(0.75 0.01 90);
+  --color-border-focus: oklch(0.45 0.12 170);
+  --color-disabled: oklch(0.88 0.005 90);
+  --color-disabled-text: oklch(0.65 0.005 90);
+  --color-overlay: oklch(0.15 0.01 60 / 0.5);
+
+  /* Spacing */
+  --spacing-0: 0px;
+  --spacing-0-5: 2px;
+  --spacing-1: 4px;
+  --spacing-1-5: 6px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+
+  /* Radii */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px oklch(0.15 0.01 60 / 0.05);
+  --shadow-md: 0 2px 4px oklch(0.15 0.01 60 / 0.06), 0 1px 2px oklch(0.15 0.01 60 / 0.04);
+  --shadow-lg: 0 4px 8px oklch(0.15 0.01 60 / 0.07), 0 2px 4px oklch(0.15 0.01 60 / 0.04);
+
+  /* Fonts */
+  --font-display: var(--font-outfit);
+  --font-body: var(--font-source-sans-3);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-subtle: var(--color-text-subtle);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
+  --color-primary-muted: var(--color-primary-muted);
+  --color-success: var(--color-success);
+  --color-success-muted: var(--color-success-muted);
+  --color-warning: var(--color-warning);
+  --color-warning-muted: var(--color-warning-muted);
+  --color-error: var(--color-error);
+  --color-error-muted: var(--color-error-muted);
+  --color-info: var(--color-info);
+  --color-info-muted: var(--color-info-muted);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-focus: var(--color-border-focus);
+  --color-disabled: var(--color-disabled);
+  --color-disabled-text: var(--color-disabled-text);
+  --color-overlay: var(--color-overlay);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: pretty;
+}
+
+.font-mono, [class*="mono"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus ring utility */
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
