@@ -6,6 +6,7 @@ import { Badge, Button, Card, Heading2, Heading3, Body, BodySmall, Caption, Mono
 import { ScoreBadge, AllergenBadge } from '@/components/molecules';
 import { NutritionPanel } from './NutritionPanel';
 import { AllergenAlert } from './AllergenAlert';
+import { AlternativesSection } from './AlternativesSection';
 import type { Product } from '@/types/product';
 import {
   getNutriScoreExplanation,
@@ -323,6 +324,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
             </div>
           </div>
         )}
+      </section>
+
+      {/* Healthier Alternatives */}
+      <section className="border-t border-border pt-6">
+        <AlternativesSection barcode={product.barcode} />
       </section>
 
       {/* Data source */}

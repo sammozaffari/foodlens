@@ -8,3 +8,4 @@ export { AllergenProfileCTA } from './AllergenProfileCTA';
 export { Navigation } from './Navigation';
 export { CompareBar } from './CompareBar';
 export { CompareTable } from './CompareTable';
+export { AlternativesSection } from './AlternativesSection';
