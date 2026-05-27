@@ -37,6 +37,18 @@ const NAV_ITEMS = [
     ),
   },
   {
+    href: '/hunt',
+    label: 'AI Hunt',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" />
+        <path d="M8 8l6 6" />
+        <path d="M14 8l-6 6" />
+      </svg>
+    ),
+  },
+  {
     href: '/profile',
     label: 'Profile',
     icon: (
